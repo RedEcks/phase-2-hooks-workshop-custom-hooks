@@ -2,8 +2,28 @@ import styled from "styled-components";
 import React, { useEffect, useState } from "react";
 
 /* ✅ modify this usePokemon custom hook to take in a query as an argument */
-export function usePokemon() {
+export function usePokemon(query) {
   /* ✅ this hook should only return one thing: an object with the pokemon data */
+  console.log("query", query)
+  const [pokemon, setPokemon] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [statusMessage, setStatus] = useState("pending")
+
+
+  useEffect(() => {
+    fetch(`https://pokeapi.co/api/v2/pokemon/${query}`)
+      .then(r => r.json())
+      .then(data => {
+        setPokemon(data) 
+        setStatus("fulfilled")})
+      .catch((error)=>{
+        setErrorMessage(["Not found"])
+        setStatus("rejected")
+      })
+  }, [query]);
+
+
+  return {data: pokemon, errors: errorMessage, status: statusMessage}
 }
 
 function Pokemon({ query }) {
@@ -11,12 +31,8 @@ function Pokemon({ query }) {
    ✅ move the code from the useState and useEffect hooks into the usePokemon hook
    then, call the usePokemon hook to access the pokemon data in this component
   */
-  const [pokemon, setPokemon] = useState(null);
-  useEffect(() => {
-    fetch(`https://pokeapi.co/api/v2/pokemon/${query}`)
-      .then(r => r.json())
-      .then(setPokemon);
-  }, [query]);
+ let {data: pokemon} = usePokemon(query)
+ console.log("pokemon", pokemon)
 
   // 🚫 don't worry about the code below here, you shouldn't have to touch it
   if (!pokemon) return <h3>Loading...</h3>;
